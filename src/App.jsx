@@ -6,10 +6,13 @@ const POLL_INTERVAL = 5000 // Poll every 5 seconds
 
 function App() {
   const [logs, setLogs] = useState([])
+  const [isListening, setIsListening] = useState(true)
 
   useEffect(() => {
-    if (!WEBHOOK_URL) {
-      console.error('VITE_WEBHOOK_URL is not configured')
+    if (!WEBHOOK_URL || !isListening) {
+      if (!WEBHOOK_URL) {
+        console.error('VITE_WEBHOOK_URL is not configured')
+      }
       return
     }
 
@@ -31,13 +34,19 @@ function App() {
     fetchLogs()
     const interval = setInterval(fetchLogs, POLL_INTERVAL)
     return () => clearInterval(interval)
-  }, [])
+  }, [isListening])
 
   return (
     <main className="app">
       <header className="hero">
         <h1>Painkiller Rollbar Logs</h1>
         <p>Listening to {WEBHOOK_URL || 'No webhook URL configured'}</p>
+        <button 
+          onClick={() => setIsListening(!isListening)}
+          className={`toggle-btn ${isListening ? 'listening' : 'paused'}`}
+        >
+          {isListening ? '⏸ Pause Polling' : '▶ Resume Polling'}
+        </button>
       </header>
 
       <section className="panel">
